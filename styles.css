@@ -1,0 +1,13 @@
+/* Flash Jump: labels and matches. Override the variables in a CSS snippet to restyle them. */
+body {
+  --flash-jump-label-bg: #ef4444;
+  --flash-jump-label-fg: #ffffff;
+  --flash-jump-match-bg: var(--text-highlight-bg);
+}
+.flash-jump-dim .cm-line { color: var(--text-faint); }
+.flash-jump-match { color: var(--text-normal); background: var(--flash-jump-match-bg); border-radius: 2px; }
+.flash-jump-label {
+  background: var(--flash-jump-label-bg); color: var(--flash-jump-label-fg); font-weight: 700;
+  font-family: var(--font-monospace); font-size: 0.85em; line-height: 1.2;
+  padding: 0 0.25em; border-radius: 3px; margin-left: 1px;
+}

@@ -1,0 +1,13 @@
+{
+  "name": "obsidian-flash-jump",
+  "version": "1.0.0",
+  "description": "Jump anywhere on screen in Vim mode: type a few characters, press the label. Works inside rendered LaTeX maths too.",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "test": "node test.js",
+    "e2e": "node e2e-isolated.mjs"
+  },
+  "author": "confuserdotcom",
+  "license": "MIT"
+}

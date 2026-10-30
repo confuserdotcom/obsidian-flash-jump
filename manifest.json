@@ -6,5 +6,6 @@
   "description": "Jump anywhere on screen in Vim mode: type a few characters, press the label. Works inside rendered LaTeX maths too.",
   "author": "confuserdotcom",
   "authorUrl": "https://github.com/confuserdotcom",
+  "fundingUrl": "https://confuserdotcom.lemonsqueezy.com",
   "isDesktopOnly": false
 }

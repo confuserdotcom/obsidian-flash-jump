@@ -156,8 +156,8 @@ class Jump {
   }
 
   idle() {
-    clearTimeout(this.timer);
-    this.timer = setTimeout(this.onOut, this.plugin.idleMs);
+    window.clearTimeout(this.timer);
+    this.timer = window.setTimeout(this.onOut, this.plugin.idleMs);
   }
 
   key(e) {
@@ -216,7 +216,7 @@ class Jump {
   end() {
     if (this.done) return;
     this.done = true;
-    clearTimeout(this.timer);
+    window.clearTimeout(this.timer);
     window.removeEventListener("keydown", this.onKey, true);
     window.removeEventListener("mousedown", this.onOut, true);
     window.removeEventListener("blur", this.onOut);
@@ -342,23 +342,57 @@ class FlashJump extends Plugin {
   }
 }
 
+// Obsidian 1.13+ draws the settings tab from getSettingDefinitions() and lists every row in its
+// settings search; older versions call display(), which draws the same definitions here.
+function drawSettings(tab, defs, nested) {
+  const el = tab.containerEl;
+  if (!nested) el.empty();
+  for (const d of defs) {
+    if ((typeof d.visible === "function" ? d.visible() : d.visible) === false) continue;
+    if (d.type === "group") {
+      if (d.heading) new Setting(el).setName(d.heading).setHeading();
+      drawSettings(tab, d.items || [], true);
+      continue;
+    }
+    const row = new Setting(el).setName(d.name), c = d.control;
+    if (d.desc) row.setDesc(d.desc);
+    if (d.render) d.render(row);
+    if (!c) continue;
+    const value = tab.getControlValue(c.key) ?? c.defaultValue, ph = c.placeholder || "";
+    const commit = async (v, redraw) => {
+      if (c.validate && c.validate(v)) return;
+      await tab.setControlValue(c.key, v);
+      if (redraw) tab.display(); // the rows that hang on this one show or hide
+    };
+    if (c.type === "toggle") row.addToggle(t => t.setValue(!!value).onChange(v => commit(v, true)));
+    else if (c.type === "dropdown") row.addDropdown(t => t.addOptions(c.options).setValue(value).onChange(v => commit(v, true)));
+    else if (c.type === "number") row.addText(t => t.setPlaceholder(ph).setValue(String(value ?? "")).onChange(v => {
+      const n = Number(v);
+      if (v.trim() && Number.isFinite(n) && !(n < c.min) && !(n > c.max)) commit(n);
+    }));
+    else row.addText(t => t.setPlaceholder(ph).setValue(value ?? "").onChange(v => commit(v)));
+  }
+}
+
 class FlashJumpSettings extends PluginSettingTab {
   constructor(app, plugin) { super(app, plugin); this.plugin = plugin; }
+  getControlValue(key) { return this.plugin.settings[key]; }
+  async setControlValue(key, value) { this.plugin.settings[key] = value; await this.plugin.saveSettings(); }
+  display() { drawSettings(this, this.getSettingDefinitions()); }
 
-  display() {
-    const { containerEl } = this, s = this.plugin.settings;
-    containerEl.empty();
-    const save = async () => { await this.plugin.saveSettings(); };
-    new Setting(containerEl).setName("Key").setDesc("Vim key that starts a jump, in normal and visual mode. It replaces Vim's own use of that key (for s, substitute: use cl instead). The command \"Jump\" works without Vim too.")
-      .addText(t => t.setPlaceholder("s").setValue(s.key).onChange(async v => { if (v.trim()) { s.key = v.trim(); await save(); } }));
-    new Setting(containerEl).setName("Label characters").setDesc("Letters used as labels, the easiest to reach first. Letters that could continue what you typed are skipped, so typing on never picks a label by mistake.")
-      .addText(t => t.setPlaceholder(ALPHABET).setValue(s.labels).onChange(async v => { s.labels = v; await save(); }));
-    new Setting(containerEl).setName("Jump inside rendered maths").setDesc("When rendered maths is on screen, show the note as written (Source mode) during the jump, so any character of a formula can be a target. Live Preview comes back when the jump ends.")
-      .addToggle(t => t.setValue(s.mathsAware).onChange(async v => { s.mathsAware = v; await save(); }));
-    new Setting(containerEl).setName("Dim the note").setDesc("Fade the text during a jump so the matches and labels stand out.")
-      .addToggle(t => t.setValue(s.dim).onChange(async v => { s.dim = v; await save(); }));
-    new Setting(containerEl).setName("Give up after (seconds)").setDesc("A jump with no key pressed for this long ends by itself.")
-      .addText(t => t.setPlaceholder("20").setValue(String(s.idleSeconds)).onChange(async v => { s.idleSeconds = v; await save(); }));
+  getSettingDefinitions() {
+    return [
+      { name: "Key", desc: "Vim key that starts a jump, in normal and visual mode. It replaces Vim's own use of that key (for s, substitute: use cl instead). The command \"Jump\" works without Vim too.",
+        control: { type: "text", key: "key", placeholder: "s", validate: v => v.trim() ? "" : "Type a key." } },
+      { name: "Label characters", desc: "Letters used as labels, the easiest to reach first. Letters that could continue what you typed are skipped, so typing on never picks a label by mistake.",
+        control: { type: "text", key: "labels", placeholder: ALPHABET } },
+      { name: "Jump inside rendered maths", desc: "When rendered maths is on screen, show the note as written (Source mode) during the jump, so any character of a formula can be a target. Live Preview comes back when the jump ends.",
+        control: { type: "toggle", key: "mathsAware" } },
+      { name: "Dim the note", desc: "Fade the text during a jump so the matches and labels stand out.",
+        control: { type: "toggle", key: "dim" } },
+      { name: "Give up after (seconds)", desc: "A jump with no key pressed for this long ends by itself.",
+        control: { type: "number", key: "idleSeconds", placeholder: "20", min: 2, max: 600 } },
+    ];
   }
 }
 

@@ -1,7 +1,7 @@
 {
   "id": "flash-jump",
   "name": "Flash Jump",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minAppVersion": "1.5.0",
   "description": "Jump anywhere on screen in Vim mode: type a few characters, press the label. Works inside rendered LaTeX maths too.",
   "author": "confuserdotcom",

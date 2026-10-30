@@ -1,4 +1,4 @@
-<img src="docs/readme/hero.svg" width="100%" alt="Flash Jump for Obsidian: press s, type a few characters, then the label on the target. Labels reach inside rendered LaTeX maths, and in visual mode the selection grows to the target.">
+<img src="docs/readme/demo.webp" width="100%" alt="Flash Jump recorded in Obsidian: type s and two letters and every match gets a label, labels reach inside rendered LaTeX maths, and in visual mode the selection follows the jump.">
 
 <p align="center">
   <b>flash.nvim for Obsidian.</b><br>
@@ -24,11 +24,7 @@ Jump anywhere on screen in [Obsidian](https://obsidian.md)'s Vim mode, like [fla
 
 What it adds over other jump plugins: **it reaches inside rendered LaTeX maths.** While a jump is open, the note shows its formulas as written, so `\varphi` in the middle of a `$$…$$` block is a target like any word; Live Preview comes back as soon as you land.
 
-<details open>
-<summary><b>See it in a real vault</b> (recorded in Obsidian)</summary>
-<br>
-<p align="center"><img src="docs/demo.gif" alt="Flash Jump demo in Obsidian" width="100%"></p>
-</details>
+<p align="center">▶ <a href="docs/readme/demo.mp4"><b>Watch the full-quality video</b></a></p>
 
 ## Use
 
